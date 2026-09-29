@@ -12,16 +12,20 @@
 
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <!-- Leaflet Geosearch CSS for Search Bar -->
+  <!-- Leaflet Geosearch CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@3.11.0/dist/geosearch.css" />
 
   <style>
     :root {
       --bg-forest-dark: #0F251B;
       --bg-forest-header: #08140E;
+      --bg-panel: #142E22;
+      --bg-input: #0B1912;
+      --border-green: #1E3A2B;
       --text-sand-beige: #E8DCC4;
       --text-sand-muted: #C5B89D;
       --accent-red-marker: #D9383A;
+      --accent-green-park: #27ae60;
       --font-heading: 'Cinzel', serif;
       --font-body: 'Roboto Condensed', sans-serif;
     }
@@ -39,24 +43,27 @@
       height: 100vh;
       background-color: var(--bg-forest-dark);
       color: var(--text-sand-beige);
+      overflow: hidden;
     }
 
+    /* HEADER */
     header {
       background-color: var(--bg-forest-header);
       color: var(--text-sand-beige);
-      padding: 14px 24px;
+      padding: 12px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 2px solid #1E3A2B;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-      z-index: 1000;
+      border-bottom: 2px solid var(--border-green);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      z-index: 2000;
+      height: 60px;
     }
 
     header h1 {
       margin: 0;
       font-family: var(--font-heading);
-      font-size: 1.5rem;
+      font-size: 1.4rem;
       font-weight: 700;
       letter-spacing: 1.5px;
       color: var(--text-sand-beige);
@@ -65,76 +72,296 @@
 
     header p {
       margin: 2px 0 0 0;
-      font-size: 0.88rem;
+      font-size: 0.82rem;
       font-weight: 300;
       color: var(--text-sand-muted);
       letter-spacing: 0.5px;
     }
 
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .panel-btn {
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      color: var(--text-sand-beige);
+      background-color: var(--bg-panel);
+      border: 1px solid var(--text-sand-muted);
+      padding: 6px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .panel-btn:hover {
+      background-color: var(--border-green);
+      color: #FFFFFF;
+    }
+
     .creator-tag {
       font-family: var(--font-heading);
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       font-weight: 600;
       letter-spacing: 1px;
       text-transform: uppercase;
       color: var(--text-sand-beige);
       background-color: rgba(232, 220, 196, 0.08);
-      padding: 6px 12px;
+      padding: 5px 10px;
       border: 1px solid rgba(232, 220, 196, 0.2);
       border-radius: 4px;
     }
 
-    #map {
+    /* MAIN CONTAINER & WORKSPACE */
+    #workspace {
+      display: flex;
       flex: 1;
-      width: 100%;
-      background: #0B1912;
+      position: relative;
+      overflow: hidden;
     }
 
-    /* Custom Leaflet Geosearch Control Styling */
+    #map {
+      flex: 1;
+      height: 100%;
+      background: #0B1912;
+      z-index: 1;
+    }
+
+    /* SIDE PANELS */
+    .side-panel {
+      width: 360px;
+      background-color: var(--bg-panel);
+      border-color: var(--border-green);
+      display: flex;
+      flex-direction: column;
+      z-index: 1500;
+      transition: transform 0.3s ease, margin 0.3s ease;
+      box-shadow: 0 0 15px rgba(0,0,0,0.6);
+      overflow-y: auto;
+    }
+
+    #panel-left {
+      border-right: 2px solid var(--border-green);
+    }
+
+    #panel-right {
+      border-left: 2px solid var(--border-green);
+    }
+
+    .side-panel.collapsed-left {
+      margin-left: -360px;
+    }
+
+    .side-panel.collapsed-right {
+      margin-right: -360px;
+    }
+
+    .panel-header {
+      background-color: var(--bg-forest-header);
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-green);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .panel-header h2 {
+      margin: 0;
+      font-family: var(--font-heading);
+      font-size: 1.05rem;
+      color: var(--text-sand-beige);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .panel-body {
+      padding: 16px;
+      flex: 1;
+    }
+
+    /* TABS */
+    .tab-group {
+      display: flex;
+      border-bottom: 1px solid var(--border-green);
+      margin-bottom: 16px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      background: none;
+      border: none;
+      color: var(--text-sand-muted);
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 8px 0;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tab-btn.active {
+      color: var(--text-sand-beige);
+      border-bottom-color: var(--text-sand-beige);
+      background-color: rgba(232, 220, 196, 0.05);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* FORM STYLING */
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-sand-muted);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-control {
+      width: 100%;
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-green);
+      border-radius: 4px;
+      color: var(--text-sand-beige);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      padding: 8px 10px;
+      outline: none;
+    }
+
+    .form-control:focus {
+      border-color: var(--text-sand-muted);
+    }
+
+    textarea.form-control {
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .form-row .form-group {
+      flex: 1;
+    }
+
+    .form-section-title {
+      font-family: var(--font-heading);
+      font-size: 0.85rem;
+      color: var(--text-sand-beige);
+      margin: 16px 0 8px 0;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--border-green);
+      letter-spacing: 0.5px;
+    }
+
+    .submit-btn {
+      width: 100%;
+      background-color: var(--border-green);
+      color: var(--text-sand-beige);
+      border: 1px solid var(--text-sand-muted);
+      font-family: var(--font-heading);
+      font-size: 0.9rem;
+      font-weight: 700;
+      padding: 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 12px;
+      transition: background-color 0.2s ease;
+    }
+
+    .submit-btn:hover {
+      background-color: #274E3B;
+      color: #FFFFFF;
+    }
+
+    /* DIRECTORY LISTINGS (RIGHT PANEL) */
+    .data-card {
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-green);
+      border-radius: 4px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: border-color 0.2s ease;
+    }
+
+    .data-card:hover {
+      border-color: var(--text-sand-muted);
+    }
+
+    .data-card-title {
+      font-family: var(--font-heading);
+      font-size: 0.92rem;
+      color: var(--text-sand-beige);
+      margin-bottom: 4px;
+    }
+
+    .data-card-sub {
+      font-size: 0.78rem;
+      color: var(--text-sand-muted);
+      margin-bottom: 4px;
+    }
+
+    .badge-mp {
+      color: #FFF;
+      background-color: var(--accent-red-marker);
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 5px;
+      border-radius: 3px;
+      text-transform: uppercase;
+    }
+
+    .badge-park {
+      color: #FFF;
+      background-color: var(--accent-green-park);
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 5px;
+      border-radius: 3px;
+      text-transform: uppercase;
+    }
+
+    /* MAP SEARCH & POPUP STYLING OVERRIDES */
     .leaflet-control-geosearch form {
       background-color: var(--bg-forest-dark) !important;
       border: 1px solid var(--text-sand-muted) !important;
       border-radius: 4px !important;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5) !important;
     }
 
     .leaflet-control-geosearch form input {
       background-color: var(--bg-forest-dark) !important;
       color: var(--text-sand-beige) !important;
       font-family: var(--font-body) !important;
-      font-size: 0.95rem !important;
-      font-weight: 500 !important;
-      padding-left: 10px !important;
     }
 
-    .leaflet-control-geosearch form input::placeholder {
-      color: var(--text-sand-muted) !important;
-    }
-
-    .leaflet-control-geosearch .results {
-      background-color: var(--bg-forest-dark) !important;
-      border: 1px solid var(--text-sand-muted) !important;
-      color: var(--text-sand-beige) !important;
-      font-family: var(--font-body) !important;
-    }
-
-    .leaflet-control-geosearch .results > * {
-      border-bottom: 1px solid #1E3A2B !important;
-      color: var(--text-sand-beige) !important;
-    }
-
-    .leaflet-control-geosearch .results > *:hover {
-      background-color: #1E3A2B !important;
-      color: #FFFFFF !important;
-    }
-
-    /* Popup Styling */
     .leaflet-popup-content-wrapper {
       background-color: var(--bg-forest-dark) !important;
       color: var(--text-sand-beige) !important;
       border: 1px solid var(--text-sand-muted) !important;
       border-radius: 6px !important;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.6) !important;
       font-family: var(--font-body) !important;
     }
 
@@ -142,49 +369,21 @@
       background-color: var(--bg-forest-dark) !important;
     }
 
-    .popup-container h3 {
+    .weather-box {
+      background-color: rgba(232, 220, 196, 0.06);
+      border: 1px dashed var(--text-sand-muted);
+      border-radius: 4px;
+      padding: 6px 8px;
+      margin-top: 6px;
+      font-size: 0.8rem;
+    }
+
+    .weather-box-title {
       font-family: var(--font-heading);
-      margin: 0 0 6px 0;
-      color: var(--text-sand-beige);
-      font-size: 1.1rem;
-      border-bottom: 1px solid rgba(232, 220, 196, 0.2);
-      padding-bottom: 4px;
-    }
-
-    .popup-badge-mp {
-      display: inline-block;
-      background-color: var(--accent-red-marker);
-      color: #FFF;
       font-size: 0.75rem;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 3px;
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .popup-badge-park {
-      display: inline-block;
-      background-color: #27ae60;
-      color: #FFF;
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 3px;
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .popup-section {
-      margin-top: 8px;
-      font-size: 0.88rem;
-      line-height: 1.35;
-    }
-
-    .popup-section strong {
       color: var(--text-sand-muted);
+      margin-bottom: 2px;
+      text-transform: uppercase;
     }
   </style>
 </head>
@@ -195,12 +394,199 @@
       <h1>GeoFields</h1>
       <p>Geospatial Analysis & Missing Persons SAR Probability Engine</p>
     </div>
-    <div class="creator-tag">
-      Created by Ty Fields
+    <div class="header-actions">
+      <button class="panel-btn" onclick="togglePanel('panel-left')">📝 Add Data Entry</button>
+      <button class="panel-btn" onclick="togglePanel('panel-right')">📁 Incident Explorer</button>
+      <div class="creator-tag">Created by Ty Fields</div>
     </div>
   </header>
 
-  <div id="map"></div>
+  <div id="workspace">
+    <!-- LEFT PANEL: DATA ENTRY FORM -->
+    <div id="panel-left" class="side-panel">
+      <div class="panel-header">
+        <h2>Data Entry Console</h2>
+        <button class="panel-btn" style="padding: 2px 8px;" onclick="togglePanel('panel-left')">✕</button>
+      </div>
+      <div class="panel-body">
+        
+        <div class="tab-group">
+          <button class="tab-btn active" onclick="switchTab('tab-mp', this)">Missing Person</button>
+          <button class="tab-btn" onclick="switchTab('tab-park', this)">Park & Agency</button>
+        </div>
+
+        <!-- TAB 1: MISSING PERSON FORM -->
+        <div id="tab-mp" class="tab-content active">
+          <form id="form-mp" onsubmit="handleMissingPersonSubmit(event)">
+            <div class="form-group">
+              <label>Full Name</label>
+              <input type="text" id="mp-name" class="form-control" placeholder="e.g., John Doe" required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>NamUs / Case ID</label>
+                <input type="text" id="mp-id" class="form-control" placeholder="MP-84920" required>
+              </div>
+              <div class="form-group">
+                <label>Age at Disappearance</label>
+                <input type="number" id="mp-age" class="form-control" placeholder="34">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Date Missing (LKL Date)</label>
+              <input type="date" id="mp-date" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label>Last Known Location (LKL) Name</label>
+              <input type="text" id="mp-lkl" class="form-control" placeholder="e.g., Bright Angel Trailhead" required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Latitude</label>
+                <input type="number" step="any" id="mp-lat" class="form-control" placeholder="36.0544" required>
+              </div>
+              <div class="form-group">
+                <label>Longitude</label>
+                <input type="number" step="any" id="mp-lng" class="form-control" placeholder="-112.1401" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Circumstances & Summary</label>
+              <textarea id="mp-circumstances" class="form-control" placeholder="Describe last seen details, planned route, equipment, etc."></textarea>
+            </div>
+
+            <!-- HISTORICAL WEATHER SECTION -->
+            <div class="form-section-title">Historical Weather on Date Missing</div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label>High / Low Temp</label>
+                <input type="text" id="mp-weather-temp" class="form-control" placeholder="e.g., 88°F / 54°F">
+              </div>
+              <div class="form-group">
+                <label>Precipitation</label>
+                <input type="text" id="mp-weather-precip" class="form-control" placeholder="e.g., 0.12 in (Rain/Snow)">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Wind Conditions</label>
+                <input type="text" id="mp-weather-wind" class="form-control" placeholder="e.g., SW 18 mph gusts">
+              </div>
+              <div class="form-group">
+                <label>Visibility / Sky</label>
+                <input type="text" id="mp-weather-visibility" class="form-control" placeholder="e.g., Clear / Dense Fog">
+              </div>
+            </div>
+
+            <div class="form-section-title">Assigned Agency & Contact</div>
+
+            <div class="form-group">
+              <label>Investigating Agency Name</label>
+              <input type="text" id="mp-agency" class="form-control" placeholder="Coconino Sheriff / NPS ISB">
+            </div>
+
+            <div class="form-group">
+              <label>Agency Contact Phone</label>
+              <input type="text" id="mp-agency-phone" class="form-control" placeholder="(928) 679-8700">
+            </div>
+
+            <button type="submit" class="submit-btn">📍 Plot Missing Person Record</button>
+          </form>
+        </div>
+
+        <!-- TAB 2: PARK & CONTACTS FORM -->
+        <div id="tab-park" class="tab-content">
+          <form id="form-park" onsubmit="handleParkSubmit(event)">
+            <div class="form-group">
+              <label>National Park Name</label>
+              <input type="text" id="park-name" class="form-control" placeholder="e.g., Zion National Park" required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Park Code</label>
+                <input type="text" id="park-code" class="form-control" placeholder="ZION" required>
+              </div>
+              <div class="form-group">
+                <label>State(s)</label>
+                <input type="text" id="park-state" class="form-control" placeholder="UT">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Latitude</label>
+                <input type="number" step="any" id="park-lat" class="form-control" placeholder="37.2982" required>
+              </div>
+              <div class="form-group">
+                <label>Longitude</label>
+                <input type="number" step="any" id="park-lng" class="form-control" placeholder="-113.0263" required>
+              </div>
+            </div>
+
+            <div class="form-section-title">Superintendent & Contacts</div>
+
+            <div class="form-group">
+              <label>Superintendent Office Name</label>
+              <input type="text" id="park-superintendent" class="form-control" placeholder="Superintendent Headquarters">
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Phone Number</label>
+                <input type="text" id="park-phone" class="form-control" placeholder="(435) 772-3256">
+              </div>
+              <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="park-email" class="form-control" placeholder="zion_info@nps.gov">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Mailing Address</label>
+              <input type="text" id="park-address" class="form-control" placeholder="1 Zion Park Blvd, Springdale, UT">
+            </div>
+
+            <div class="form-section-title">SAR & Investigating Agencies</div>
+
+            <div class="form-group">
+              <label>Primary SAR / Law Enforcement Partner</label>
+              <input type="text" id="park-sar-agency" class="form-control" placeholder="Zion NPS Search & Rescue / Washington Co. Sheriff">
+            </div>
+
+            <button type="submit" class="submit-btn">🌲 Save Park Record</button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- MAP CANVAS -->
+    <div id="map"></div>
+
+    <!-- RIGHT PANEL: DATA EXPLORER & DIRECTORY -->
+    <div id="panel-right" class="side-panel">
+      <div class="panel-header">
+        <h2>Incident Directory</h2>
+        <button class="panel-btn" style="padding: 2px 8px;" onclick="togglePanel('panel-right')">✕</button>
+      </div>
+      <div class="panel-body">
+        <div class="form-group">
+          <input type="text" id="directory-search" class="form-control" placeholder="Filter cases or park names..." oninput="filterDirectory()">
+        </div>
+        <div id="directory-list">
+          <!-- Cards populated dynamically via app.js -->
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
