@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GeoFields - Public Lands Geospatial Analysis</title>
+
+  <!-- Leaflet CSS for Web Mapping -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      background-color: #1a252f;
+      color: #ffffff;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: #bdc3c7;
+    }
+    #map {
+      flex: 1;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <h1>GeoFields</h1>
+      <p>Geospatial Analysis & Missing Persons SAR Probability Engine</p>
+    </div>
+    <div style="font-size: 0.8rem; text-align: right;">
+      <span>Created by Ty Fields</span>
+    </div>
+  </header>
+
+  <div id="map"></div>
+
+  <!-- Leaflet JS for Web Mapping -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+  <script>
+    // Initialize the Leaflet map centered on US Public Lands
+    const map = L.map('map').setView([39.8283, -98.5795], 4);
+
+    // Add OpenStreetMap base tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' , {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors | GeoFields by Ty Fields'
+    }).addTo(map);
+  </script>
+
+</body>
+</html>
