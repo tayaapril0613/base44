@@ -116,7 +116,7 @@
       border-radius: 4px;
     }
 
-    /* MAIN CONTAINER & WORKSPACE */
+    /* MAIN WORKSPACE */
     #workspace {
       display: flex;
       flex: 1;
@@ -296,7 +296,26 @@
       color: #FFFFFF;
     }
 
-    /* DIRECTORY LISTINGS (RIGHT PANEL) */
+    .secondary-btn {
+      width: 100%;
+      background-color: rgba(232, 220, 196, 0.08);
+      color: var(--text-sand-beige);
+      border: 1px solid var(--border-green);
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 8px;
+      text-transform: uppercase;
+    }
+
+    .secondary-btn:hover {
+      background-color: var(--border-green);
+    }
+
+    /* DIRECTORY LISTINGS */
     .data-card {
       background-color: var(--bg-input);
       border: 1px solid var(--border-green);
@@ -344,7 +363,7 @@
       text-transform: uppercase;
     }
 
-    /* MAP SEARCH & POPUP STYLING OVERRIDES */
+    /* LEAFLET OVERRIDES */
     .leaflet-control-geosearch form {
       background-color: var(--bg-forest-dark) !important;
       border: 1px solid var(--text-sand-muted) !important;
@@ -497,7 +516,7 @@
               <input type="text" id="mp-agency-phone" class="form-control" placeholder="(928) 679-8700">
             </div>
 
-            <button type="submit" class="submit-btn">📍 Plot Missing Person Record</button>
+            <button type="submit" class="submit-btn">📍 Plot & Save Missing Person Record</button>
           </form>
         </div>
 
@@ -565,6 +584,11 @@
           </form>
         </div>
 
+        <!-- LOCAL STORAGE & DATA MANAGEMENT FOOTER -->
+        <div class="form-section-title">Storage & Data Management</div>
+        <button class="secondary-btn" onclick="exportDataToJSON()">💾 Export Saved Data to JSON</button>
+        <button class="secondary-btn" style="color: #e74c3c; border-color: rgba(231,76,60,0.3);" onclick="clearSavedData()">🗑️ Reset Saved Storage</button>
+
       </div>
     </div>
 
@@ -582,7 +606,7 @@
           <input type="text" id="directory-search" class="form-control" placeholder="Filter cases or park names..." oninput="filterDirectory()">
         </div>
         <div id="directory-list">
-          <!-- Cards populated dynamically via app.js -->
+          <!-- Populated dynamically via app.js -->
         </div>
       </div>
     </div>
