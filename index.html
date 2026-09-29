@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GeoFields - Public Lands Geospatial Analysis</title>
-
+  
   <!-- Leaflet CSS for Web Mapping -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
+  
   <style>
     body {
       margin: 0;
@@ -24,6 +24,11 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.2rem;
+      letter-spacing: 0.5px;
     }
     header p {
       margin: 0;
@@ -51,17 +56,10 @@
   <div id="map"></div>
 
   <!-- Leaflet JS for Web Mapping -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
-  <script>
-    // Initialize the Leaflet map centered on US Public Lands
-    const map = L.map('map').setView([39.8283, -98.5795], 4);
-
-    // Add OpenStreetMap base tile layer
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' , {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap contributors | GeoFields by Ty Fields'
-    }).addTo(map);
-  </script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- Link to GeoFields Core App Script -->
+  <script src="src/app.js"></script>
 
 </body>
 </html>
