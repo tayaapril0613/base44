@@ -2,7 +2,7 @@
  * GeoFields - Spatial Analysis & Web Mapping Application
  * Conceived, designed, and developed by Ty Fields
  * 
- * Core Web GIS Engine & Data Form Manager (src/app.js)
+ * Core Engine & LocalStorage Manager (src/app.js)
  * License: Apache 2.0 / GPLv3 (See LICENSE and NOTICE files)
  */
 
@@ -10,8 +10,8 @@ let map;
 let missingPersonsLayer;
 let nationalParksLayer;
 
-// Core Data Repositories
-const missingPersonsData = [
+// Default Seed Repositories
+const defaultMissingPersons = [
   {
     id: "MP-NAMUS-84920",
     fullName: "John Doe (Sample)",
@@ -46,7 +46,7 @@ const missingPersonsData = [
   }
 ];
 
-const nationalParksData = [
+const defaultNationalParks = [
   {
     parkName: "Grand Canyon National Park",
     parkCode: "GRCA",
@@ -73,7 +73,14 @@ const nationalParksData = [
   }
 ];
 
+// Active State Repositories (Loaded from LocalStorage or Defaults)
+let missingPersonsData = [];
+let nationalParksData = [];
+
 document.addEventListener('DOMContentLoaded', () => {
+
+  // Load Saved LocalStorage Data
+  loadLocalStorageData();
 
   // 1. Initialize Leaflet Map Instance
   map = L.map('map', {
@@ -137,7 +144,21 @@ document.addEventListener('DOMContentLoaded', () => {
   L.control.layers(baseMaps, overlayMaps, { position: 'topright' }).addTo(map);
 });
 
-// Custom Icon Generators
+// LOCAL STORAGE MANAGERS
+function loadLocalStorageData() {
+  const savedMP = localStorage.getItem('geofields_mp_data');
+  const savedParks = localStorage.getItem('geofields_parks_data');
+
+  missingPersonsData = savedMP ? JSON.parse(savedMP) : [...defaultMissingPersons];
+  nationalParksData = savedParks ? JSON.parse(savedParks) : [...defaultNationalParks];
+}
+
+function saveToLocalStorage() {
+  localStorage.setItem('geofields_mp_data', JSON.stringify(missingPersonsData));
+  localStorage.setItem('geofields_parks_data', JSON.stringify(nationalParksData));
+}
+
+// Icon Generators
 const createRedLKLIcon = () => {
   return L.divIcon({
     className: 'custom-red-pin',
@@ -170,7 +191,7 @@ const createParkIcon = () => {
   });
 };
 
-// Render Datasets to Map & Right Directory Panel
+// Render Datasets
 function renderAllData() {
   missingPersonsLayer.clearLayers();
   nationalParksLayer.clearLayers();
@@ -179,7 +200,7 @@ function renderAllData() {
   if (directoryList) directoryList.innerHTML = '';
 
   // Render Missing Persons
-  missingPersonsData.forEach((person, idx) => {
+  missingPersonsData.forEach((person) => {
     const marker = L.marker([person.lat, person.lng], { icon: createRedLKLIcon() });
 
     const popupContent = `
@@ -207,7 +228,6 @@ function renderAllData() {
     marker.bindPopup(popupContent);
     missingPersonsLayer.addLayer(marker);
 
-    // Add to Directory List
     if (directoryList) {
       const card = document.createElement('div');
       card.className = 'data-card';
@@ -223,7 +243,7 @@ function renderAllData() {
   });
 
   // Render National Parks
-  nationalParksData.forEach((park, idx) => {
+  nationalParksData.forEach((park) => {
     const marker = L.marker([park.lat, park.lng], { icon: createParkIcon() });
 
     const popupContent = `
@@ -245,7 +265,6 @@ function renderAllData() {
     marker.bindPopup(popupContent);
     nationalParksLayer.addLayer(marker);
 
-    // Add to Directory List
     if (directoryList) {
       const card = document.createElement('div');
       card.className = 'data-card';
@@ -261,7 +280,7 @@ function renderAllData() {
   });
 }
 
-// Form Submission Handlers
+// Form Handlers
 function handleMissingPersonSubmit(e) {
   e.preventDefault();
 
@@ -283,14 +302,12 @@ function handleMissingPersonSubmit(e) {
   };
 
   missingPersonsData.unshift(newRecord);
+  saveToLocalStorage();
   renderAllData();
 
-  // Center map on new point
   map.setView([newRecord.lat, newRecord.lng], 10);
-
-  // Reset Form
   document.getElementById('form-mp').reset();
-  alert(`Missing person record for ${newRecord.fullName} added successfully.`);
+  alert(`Missing person record for ${newRecord.fullName} saved locally and plotted.`);
 }
 
 function handleParkSubmit(e) {
@@ -310,17 +327,42 @@ function handleParkSubmit(e) {
   };
 
   nationalParksData.unshift(newPark);
+  saveToLocalStorage();
   renderAllData();
 
-  // Center map on new park point
   map.setView([newPark.lat, newPark.lng], 9);
-
-  // Reset Form
   document.getElementById('form-park').reset();
-  alert(`Park record for ${newPark.parkName} added successfully.`);
+  alert(`Park record for ${newPark.parkName} saved locally and plotted.`);
 }
 
-// UI Panel & Tab Functions
+// Data Export & Reset Utilities
+function exportDataToJSON() {
+  const exportPayload = {
+    missingPersons: missingPersonsData,
+    nationalParks: nationalParksData,
+    exportedAt: new Date().toISOString()
+  };
+
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportPayload, null, 2));
+  const downloadAnchor = document.createElement('a');
+  downloadAnchor.setAttribute("href", dataStr);
+  downloadAnchor.setAttribute("download", `GeoFields_Data_Export_${new Date().toISOString().slice(0,10)}.json`);
+  document.body.appendChild(downloadAnchor);
+  downloadAnchor.click();
+  downloadAnchor.remove();
+}
+
+function clearSavedData() {
+  if (confirm("Are you sure you want to clear your locally saved entries and reset back to default samples?")) {
+    localStorage.removeItem('geofields_mp_data');
+    localStorage.removeItem('geofields_parks_data');
+    loadLocalStorageData();
+    renderAllData();
+    alert("Saved local storage cleared successfully.");
+  }
+}
+
+// Panel & Directory Helpers
 function togglePanel(panelId) {
   const panel = document.getElementById(panelId);
   if (!panel) return;
